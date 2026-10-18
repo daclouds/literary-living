@@ -19,3 +19,15 @@ test('separate fields allow any title and retain values on validation errors',as
  await page.route('**/api/design',async route=>{const body=route.request().postDataJSON();expect(body).toEqual({book:'듄',character:'폴 아트레이데스'});await route.fulfill({status:422,contentType:'application/json',body:JSON.stringify({error:'작품과 등장인물의 관계를 확인하지 못했습니다.'})});});
  await page.goto('/');await page.getByRole('button',{name:'나만의 이야기 시작하기'}).click();await expect(page.locator('textarea')).toHaveCount(0);const submit=page.getByRole('button',{name:'공간 콘셉트 찾기'});await expect(submit).toBeDisabled();await page.getByRole('textbox',{name:'책 제목',exact:true}).fill('듄');await expect(submit).toBeDisabled();await page.getByRole('textbox',{name:'등장인물',exact:true}).fill('폴 아트레이데스');await submit.click();await expect(page.getByRole('alert')).toContainText('관계를 확인하지 못했습니다');await expect(page.getByRole('textbox',{name:'책 제목',exact:true})).toHaveValue('듄');await expect(page.getByText('현재 3개 작품 지원')).toHaveCount(0);
 });
+
+test('generated results can be reopened and saved without demo furniture markers',async({page})=>{
+ const concepts=await (await page.request.get('/api/catalog')).json();const concept=concepts[0];
+ const job={id:'generated-test-job',conceptId:concept.id,state:'succeeded',error:null,image:'/images/gatsby.png'};
+ await page.route('**/api/me',r=>r.fulfill({json:{user:{id:'test-user',name:'GPU 독자',email:'gpu@example.com'}}}));
+ await page.route('**/api/generations',r=>r.fulfill({json:{configured:true,jobs:[job]}}));
+ let saved=false;
+ await page.route('**/api/rooms',r=>{if(r.request().method()==='POST'){expect(r.request().postDataJSON()).toEqual({conceptId:concept.id,generationId:job.id});saved=true;return r.fulfill({status:201,json:{room:{...concept,id:'saved-generated',conceptId:concept.id,generationId:job.id,isGenerated:true,items:[],isPublic:false}}});}return r.fulfill({json:[]});});
+ await page.goto('/');await page.getByRole('button',{name:'나의 공간',exact:true}).click();await page.getByRole('button',{name:'결과 보기'}).click();
+ await expect(page.locator('.detail-tag')).toHaveText('Nosana GPU 생성');await expect(page.locator('.hotspot')).toHaveCount(0);await expect(page.locator('.detail-info')).toContainText('소재·치수 분석은 준비 중');
+ await page.getByRole('button',{name:'내 공간에 저장하기'}).click();await expect(page.getByRole('status')).toContainText('비공개로 저장');expect(saved).toBe(true);
+});

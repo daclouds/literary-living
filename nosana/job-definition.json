@@ -1,0 +1,39 @@
+{
+  "version": "0.1",
+  "type": "container",
+  "ops": [
+    {
+      "type": "container/run",
+      "id": "generate-room",
+      "args": {
+        "image": "pytorch/pytorch@sha256:77f17f843507062875ce8be2a6f76aa6aa3df7f9ef1e31d9d7432f4b0f563dee",
+        "gpu": true,
+        "entrypoint": [
+          "/bin/bash",
+          "-lc"
+        ],
+        "cmd": [
+          "set -euo pipefail; python -m pip install --no-cache-dir diffusers==0.32.2 transformers==4.48.3 accelerate==1.3.0 safetensors==0.5.2 huggingface-hub==0.28.1 Pillow==11.1.0 requests==2.32.5; python -c 'import os,base64; exec(compile(base64.b64decode(os.environ[\"LL_WORKER_CODE_B64\"]),\"worker.py\",\"exec\"))'"
+        ],
+        "env": {
+          "LL_CALLBACK_URL": "https://example.invalid",
+          "LL_JOB_ID": "configuration-check",
+          "LL_JOB_TOKEN": "setup-only-no-access",
+          "LL_WORKER_CODE_B64": "IiIiT25lIE5vc2FuYSBhbGxvY2F0aW9uLCBvbmUgaW1hZ2UsIHRoZW4gZXhpdC4gTm8gd2ViIHNlcnZlciBvciB3YWxsZXQgc2VjcmV0cy4iIiIKaW1wb3J0IGlvCmltcG9ydCBvcwppbXBvcnQgc3lzCmltcG9ydCB0aW1lCmZyb20gdXJsbGliLnBhcnNlIGltcG9ydCB1cmxwYXJzZQoKaW1wb3J0IHJlcXVlc3RzCgoKZGVmIHJlbmRlcl9pbWFnZShzcGVjKToKICAgIGltcG9ydCB0b3JjaAogICAgZnJvbSBkaWZmdXNlcnMgaW1wb3J0IFN0YWJsZURpZmZ1c2lvblhMUGlwZWxpbmUKCiAgICBpZiBub3QgdG9yY2guY3VkYS5pc19hdmFpbGFibGUoKToKICAgICAgICByYWlzZSBSdW50aW1lRXJyb3IoIkNVREEgR1BVIGlzIHVuYXZhaWxhYmxlIikKICAgIHBpcGUgPSBTdGFibGVEaWZmdXNpb25YTFBpcGVsaW5lLmZyb21fcHJldHJhaW5lZCgKICAgICAgICBzcGVjWyJtb2RlbCJdLCByZXZpc2lvbj1zcGVjWyJyZXZpc2lvbiJdLAogICAgICAgIHRvcmNoX2R0eXBlPXRvcmNoLmZsb2F0MTYsIHVzZV9zYWZldGVuc29ycz1UcnVlLCB2YXJpYW50PSJmcDE2IiwKICAgICkudG8oImN1ZGEiKQogICAgcGlwZS5lbmFibGVfdmFlX3NsaWNpbmcoKQogICAgcGlwZS5lbmFibGVfdmFlX3RpbGluZygpCiAgICBnZW5lcmF0b3IgPSB0b3JjaC5HZW5lcmF0b3IoZGV2aWNlPSJjdWRhIikubWFudWFsX3NlZWQoc3BlY1sic2VlZCJdKQogICAgd2l0aCB0b3JjaC5pbmZlcmVuY2VfbW9kZSgpOgogICAgICAgIGltYWdlID0gcGlwZSgKICAgICAgICAgICAgcHJvbXB0PXNwZWNbInByb21wdCJdLCBuZWdhdGl2ZV9wcm9tcHQ9c3BlY1sibmVnYXRpdmVQcm9tcHQiXSwKICAgICAgICAgICAgd2lkdGg9c3BlY1sid2lkdGgiXSwgaGVpZ2h0PXNwZWNbImhlaWdodCJdLAogICAgICAgICAgICBudW1faW5mZXJlbmNlX3N0ZXBzPXNwZWNbInN0ZXBzIl0sIGd1aWRhbmNlX3NjYWxlPTcuMCwKICAgICAgICAgICAgZ2VuZXJhdG9yPWdlbmVyYXRvciwKICAgICAgICApLmltYWdlc1swXQogICAgb3V0cHV0ID0gaW8uQnl0ZXNJTygpCiAgICBpbWFnZS5zYXZlKG91dHB1dCwgZm9ybWF0PSJQTkciKQogICAgcmV0dXJuIG91dHB1dC5nZXR2YWx1ZSgpCgoKZGVmIHJ1bihjYWxsYmFja191cmwsIGpvYl9pZCwgdG9rZW4sIHJlbmRlcmVyPXJlbmRlcl9pbWFnZSwgc2Vzc2lvbj1Ob25lKToKICAgIGlmIHVybHBhcnNlKGNhbGxiYWNrX3VybCkuc2NoZW1lICE9ICJodHRwcyI6CiAgICAgICAgcmFpc2UgVmFsdWVFcnJvcigiQSBwdWJsaWMgSFRUUFMgY2FsbGJhY2sgVVJMIGlzIHJlcXVpcmVkIikKICAgIHNlc3Npb24gPSBzZXNzaW9uIG9yIHJlcXVlc3RzLlNlc3Npb24oKQogICAgIyBCZWFyZXIgY3JlZGVudGlhbHMgYXJlIG5ldmVyIHNlbnQgdGhyb3VnaCByZWRpcmVjdHMgdG8gYW5vdGhlciBob3N0LgogICAgaGVhZGVycyA9IHsiQXV0aG9yaXphdGlvbiI6ICJCZWFyZXIgIiArIHRva2VufQogICAgYmFzZSA9IGNhbGxiYWNrX3VybC5yc3RyaXAoIi8iKSArICIvYXBpL3dvcmtlci9qb2JzLyIgKyBqb2JfaWQKICAgIGNsYWltZWQgPSBzZXNzaW9uLnBvc3QoYmFzZSArICIvY2xhaW0iLCBoZWFkZXJzPWhlYWRlcnMsIHRpbWVvdXQ9MzAsIGFsbG93X3JlZGlyZWN0cz1GYWxzZSkKICAgIGlmIGNsYWltZWQuc3RhdHVzX2NvZGUgPT0gNDA5OgogICAgICAgIHByaW50KCJKb2IgYWxyZWFkeSBjbGFpbWVkIG9yIHRlcm1pbmFsOyBleGl0aW5nIHdpdGhvdXQgaW5mZXJlbmNlIikKICAgICAgICByZXR1cm4KICAgIGNsYWltZWQucmFpc2VfZm9yX3N0YXR1cygpCiAgICBzcGVjID0gY2xhaW1lZC5qc29uKCkKICAgIHRyeToKICAgICAgICBpbWFnZSA9IHJlbmRlcmVyKHNwZWMpCiAgICAgICAgZm9yIGF0dGVtcHQgaW4gcmFuZ2UoMyk6CiAgICAgICAgICAgIHRyeToKICAgICAgICAgICAgICAgIHJlc3BvbnNlID0gc2Vzc2lvbi5wdXQoYmFzZSArICIvaW1hZ2UiLCBkYXRhPWltYWdlLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBoZWFkZXJzPXsqKmhlYWRlcnMsICJDb250ZW50LVR5cGUiOiAiaW1hZ2UvcG5nIn0sCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHRpbWVvdXQ9OTAsIGFsbG93X3JlZGlyZWN0cz1GYWxzZSkKICAgICAgICAgICAgICAgIHJlc3BvbnNlLnJhaXNlX2Zvcl9zdGF0dXMoKQogICAgICAgICAgICAgICAgYnJlYWsKICAgICAgICAgICAgZXhjZXB0IHJlcXVlc3RzLlJlcXVlc3RFeGNlcHRpb246CiAgICAgICAgICAgICAgICBpZiBhdHRlbXB0ID09IDI6CiAgICAgICAgICAgICAgICAgICAgcmFpc2UKICAgICAgICAgICAgICAgIHRpbWUuc2xlZXAoMiAqKiBhdHRlbXB0KQogICAgICAgIHByaW50KCJJbWFnZSB1cGxvYWRlZCBzdWNjZXNzZnVsbHk7IEdQVSBwcm9jZXNzIGV4aXRpbmciKQogICAgZXhjZXB0IEV4Y2VwdGlvbjoKICAgICAgICAjIEtlZXAgZXhjZXB0aW9uIG1lc3NhZ2VzIGFuZCBVUkxzIG91dCBvZiBsb2dzOiB0aGV5IG1heSBjb250YWluIGNhcGFiaWxpdGllcy4KICAgICAgICB0cnk6CiAgICAgICAgICAgIHNlc3Npb24ucG9zdChiYXNlICsgIi9mYWlsIiwganNvbj17ImNvZGUiOiAiSU5GRVJFTkNFX0ZBSUxFRCJ9LAogICAgICAgICAgICAgICAgICAgICAgICAgaGVhZGVycz1oZWFkZXJzLCB0aW1lb3V0PTIwLCBhbGxvd19yZWRpcmVjdHM9RmFsc2UpCiAgICAgICAgZXhjZXB0IHJlcXVlc3RzLlJlcXVlc3RFeGNlcHRpb246CiAgICAgICAgICAgIHBhc3MKICAgICAgICBwcmludCgiSW5mZXJlbmNlIG9yIHJlc3VsdCB1cGxvYWQgZmFpbGVkIiwgZmlsZT1zeXMuc3RkZXJyKQogICAgICAgIHJhaXNlIFJ1bnRpbWVFcnJvcigiR1BVIGltYWdlIGdlbmVyYXRpb24gZmFpbGVkIikgZnJvbSBOb25lCgoKaWYgX19uYW1lX18gPT0gIl9fbWFpbl9fIiBhbmQgb3MuZW52aXJvbi5nZXQoIkxMX1NFVFVQX09OTFkiKSAhPSAiMSI6CiAgICBydW4ob3MuZW52aXJvblsiTExfQ0FMTEJBQ0tfVVJMIl0sIG9zLmVudmlyb25bIkxMX0pPQl9JRCJdLCBvcy5lbnZpcm9uWyJMTF9KT0JfVE9LRU4iXSkK",
+          "PYTHONUNBUFFERED": "1",
+          "HF_HUB_DISABLE_TELEMETRY": "1",
+          "LL_SETUP_ONLY": "1"
+        },
+        "restart_policy": "no"
+      },
+      "execution": {
+        "timeout": 1200
+      }
+    }
+  ],
+  "meta": {
+    "trigger": "literary-living",
+    "mode": "one-image-per-job"
+  },
+  "deployment_id": "Aa2BjYJuDjS9vbN5rpDrJM2qGF9Ak6fz9esSuFESRcsa"
+}

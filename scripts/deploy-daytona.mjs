@@ -21,7 +21,7 @@ execFileSync('npm',['run','build'],{cwd:root,stdio:'inherit'});
 const temp=mkdtempSync(path.join(tmpdir(),'living-deploy-'));
 try{
  const archive=path.join(temp,'release.tar.gz');
- execFileSync('tar',['-czf',archive,'package.json','package-lock.json','server.js','catalog.js','literature.js','dist'],{cwd:root});
+ execFileSync('tar',['-czf',archive,'package.json','package-lock.json','server.js','catalog.js','literature.js','nosana.js','generations.js','gpu','dist'],{cwd:root});
  const buffer=readFileSync(archive);const checksum=createHash('sha256').update(buffer).digest('hex');
  const release='release-'+Date.now()+'-'+randomBytes(3).toString('hex');
  // Isolated release directory: never overwrite existing application or user data.
@@ -31,6 +31,12 @@ try{
  await run('mkdir -p '+q(remote)+' '+q(base+'/data'));
  await sandbox.fs.uploadFile(buffer,remote+'/release.tar.gz');
  await run('cd '+q(remote)+' && printf %s '+q(checksum+'  release.tar.gz\n')+' | sha256sum -c - && tar -xzf release.tar.gz && npm ci --omit=dev',300);
+ const signed=await sandbox.getSignedPreviewUrl(3000,86400);
+ const url=signed.url;if(!url)throw new Error('Daytona did not return a signed preview URL.');
+ const runtimeVars={LL_PUBLIC_URL:process.env.LL_PUBLIC_URL||url,LL_PUBLIC_URL_EXPIRES:process.env.LL_PUBLIC_URL?'0':String(Date.now()+86400000),NOSANA_DEPLOYMENT_ID:process.env.NOSANA_DEPLOYMENT_ID||'Aa2BjYJuDjS9vbN5rpDrJM2qGF9Ak6fz9esSuFESRcsa'};
+ if(process.env.NOSANA_API_KEY)runtimeVars.NOSANA_API_KEY=process.env.NOSANA_API_KEY;
+ if(process.env.NOSANA_MODEL_REVISION)runtimeVars.NOSANA_MODEL_REVISION=process.env.NOSANA_MODEL_REVISION;
+ await sandbox.updateEnv(runtimeVars);
  // Only replace our own previously deployed server; leave unrelated services untouched.
  const stopOwned=`const fs=require('fs');const base=${JSON.stringify(base)};const matches=[];for(const pid of fs.readdirSync('/proc').filter(x=>/^\\d+$/.test(x))){try{const cwd=fs.readlinkSync('/proc/'+pid+'/cwd');const cmd=fs.readFileSync('/proc/'+pid+'/cmdline','utf8').split('\\0').filter(Boolean);if(cwd.startsWith(base+'/release-')&&cmd.at(-1)==='server.js'&&/node$/.test(cmd[0]))matches.push(Number(pid));}catch{}}if(matches.length>1)throw new Error('Multiple managed app processes; inspect before replacing');for(const pid of matches)process.kill(pid,'SIGTERM');`;
  await run('node -e '+q(stopOwned));
@@ -38,10 +44,7 @@ try{
  const sessionId='literary-living-'+Date.now();await sandbox.process.createSession(sessionId);
  await sandbox.process.executeSessionCommand(sessionId,{command:runtime+'cd '+q(remote)+' && NODE_ENV=production PORT=3000 DATA_DIR='+q(base+'/data')+' node server.js',runAsync:true});
  await run("node -e "+q("(async()=>{for(let i=0;i<30;i++){try{const r=await fetch('http://127.0.0.1:3000/api/health');const d=await r.json();if(r.ok&&d.ok)process.exit(0);}catch{}await new Promise(r=>setTimeout(r,1000));}process.exit(1)})()"),45);
- const signed=await sandbox.getSignedPreviewUrl(3000,86400);
- // A signed link exposes only the intended preview, rather than making every sandbox port public.
- const url=signed.url;if(!url)throw new Error('Daytona did not return a signed preview URL.');
  let externalVerified=false;
  try{const html=execFileSync('curl',['--fail','--location','--silent','--show-error','--max-time','30',url],{encoding:'utf8',stdio:['ignore','pipe','pipe']});externalVerified=html.includes('Literary Living');}catch{console.warn('App health passed inside sandbox; external verification is blocked or unavailable. Check preview access separately.');}
- console.log(JSON.stringify({status:'deployed',url,externalVerified,expiresInSeconds:86400,sessionId,releaseDirectory:remote,databaseDirectory:base+'/data',generation:'not_configured'},null,2));
+ console.log(JSON.stringify({status:'deployed',url,externalVerified,expiresInSeconds:86400,sessionId,releaseDirectory:remote,databaseDirectory:base+'/data',generation:process.env.NOSANA_API_KEY?'configured-not-yet-GPU-verified':'not_configured'},null,2));
 }finally{rmSync(temp,{recursive:true,force:true});}
