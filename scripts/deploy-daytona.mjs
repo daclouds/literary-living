@@ -21,7 +21,7 @@ execFileSync('npm',['run','build'],{cwd:root,stdio:'inherit'});
 const temp=mkdtempSync(path.join(tmpdir(),'living-deploy-'));
 try{
  const archive=path.join(temp,'release.tar.gz');
- execFileSync('tar',['-czf',archive,'package.json','package-lock.json','server.js','catalog.js','dist'],{cwd:root});
+ execFileSync('tar',['-czf',archive,'package.json','package-lock.json','server.js','catalog.js','literature.js','dist'],{cwd:root});
  const buffer=readFileSync(archive);const checksum=createHash('sha256').update(buffer).digest('hex');
  const release='release-'+Date.now()+'-'+randomBytes(3).toString('hex');
  // Isolated release directory: never overwrite existing application or user data.
@@ -31,8 +31,10 @@ try{
  await run('mkdir -p '+q(remote)+' '+q(base+'/data'));
  await sandbox.fs.uploadFile(buffer,remote+'/release.tar.gz');
  await run('cd '+q(remote)+' && printf %s '+q(checksum+'  release.tar.gz\n')+' | sha256sum -c - && tar -xzf release.tar.gz && npm ci --omit=dev',300);
- // Stop safely if another service already occupies the chosen port; leave it untouched.
- await run("node -e "+q("const s=require('net').createServer();s.once('error',()=>process.exit(1));s.listen(3000,'0.0.0.0',()=>s.close());"));
+ // Only replace our own previously deployed server; leave unrelated services untouched.
+ const stopOwned=`const fs=require('fs');const base=${JSON.stringify(base)};const matches=[];for(const pid of fs.readdirSync('/proc').filter(x=>/^\\d+$/.test(x))){try{const cwd=fs.readlinkSync('/proc/'+pid+'/cwd');const cmd=fs.readFileSync('/proc/'+pid+'/cmdline','utf8').split('\\0').filter(Boolean);if(cwd.startsWith(base+'/release-')&&cmd.at(-1)==='server.js'&&/node$/.test(cmd[0]))matches.push(Number(pid));}catch{}}if(matches.length>1)throw new Error('Multiple managed app processes; inspect before replacing');for(const pid of matches)process.kill(pid,'SIGTERM');`;
+ await run('node -e '+q(stopOwned));
+ await run('node -e '+q("(async()=>{for(let i=0;i<20;i++){const ok=await new Promise(r=>{const s=require('net').createServer();s.once('error',()=>r(false));s.listen(3000,'0.0.0.0',()=>s.close(()=>r(true)));});if(ok)return;await new Promise(r=>setTimeout(r,500));}process.exit(1)})()"));
  const sessionId='literary-living-'+Date.now();await sandbox.process.createSession(sessionId);
  await sandbox.process.executeSessionCommand(sessionId,{command:runtime+'cd '+q(remote)+' && NODE_ENV=production PORT=3000 DATA_DIR='+q(base+'/data')+' node server.js',runAsync:true});
  await run("node -e "+q("(async()=>{for(let i=0;i<30;i++){try{const r=await fetch('http://127.0.0.1:3000/api/health');const d=await r.json();if(r.ok&&d.ok)process.exit(0);}catch{}await new Promise(r=>setTimeout(r,1000));}process.exit(1)})()"),45);

@@ -10,7 +10,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci --omit=dev && mkdir -p /app/data && chown node:node /app/data
 COPY --from=build /app/dist ./dist
-COPY server.js catalog.js ./
+COPY server.js catalog.js literature.js ./
 USER node
 EXPOSE 3000
 VOLUME ["/app/data"]
