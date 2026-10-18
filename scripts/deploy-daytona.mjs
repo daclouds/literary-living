@@ -21,7 +21,7 @@ execFileSync('npm',['run','build'],{cwd:root,stdio:'inherit'});
 const temp=mkdtempSync(path.join(tmpdir(),'living-deploy-'));
 try{
  const archive=path.join(temp,'release.tar.gz');
- execFileSync('tar',['-czf',archive,'package.json','package-lock.json','server.js','catalog.js','literature.js','nosana.js','generations.js','gpu','dist'],{cwd:root});
+ execFileSync('tar',['-czf',archive,'package.json','package-lock.json','server.js','catalog.js','literature.js','nosana.js','generations.js','gpu','scripts/configure-nosana.mjs','nosana/job-definition.json','dist'],{cwd:root});
  const buffer=readFileSync(archive);const checksum=createHash('sha256').update(buffer).digest('hex');
  const release='release-'+Date.now()+'-'+randomBytes(3).toString('hex');
  // Isolated release directory: never overwrite existing application or user data.

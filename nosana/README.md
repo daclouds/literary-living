@@ -5,8 +5,8 @@
 ## 구성
 
 - 원본 deployment: `Aa2BjYJuDjS9vbN5rpDrJM2qGF9Ak6fz9esSuFESRcsa`
-- API: `https://deployment-manager.k8s.prd.nos.ci` (공식 `@nosana/api` 2.20.0의 경로/스키마 확인)
-- API 키 인증: `Authorization: Bearer ...`; 지갑 시드/비밀키는 필요하지 않습니다. 계정의 배포 접근 권한과 결제 잔액은 필요합니다.
+- API: `https://client-manager.k8s.prd.nosana.com` (공식 `@nosana/api` 2.20.0의 경로/스키마 확인)
+- API 키는 client-manager가 deployment-manager로 전달합니다. 배포 관리 서버로 직접 보내면 401이 반환됩니다. API 키 인증: `Authorization: Bearer ...`; 지갑 시드/비밀키는 필요하지 않습니다. 계정의 배포 접근 권한과 결제 잔액은 필요합니다.
 - 모델: `stabilityai/stable-diffusion-xl-base-1.0`, FP16 safetensors, 1024×768, 30 steps, 요청별 seed
 - 기반 이미지: 공식 PyTorch 2.6 CUDA 12.4 런타임을 SHA-256 digest로 고정
 - 컨테이너 레지스트리 계정 없이 실행 가능: 공식 기반 이미지에 고정된 Python 의존성과 내장 worker 코드를 실행합니다. 모델 다운로드/초기화 시간도 작업 실행 시간에 포함될 수 있습니다.
