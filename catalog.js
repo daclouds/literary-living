@@ -1,0 +1,15 @@
+export const catalog = [
+ {id:'gatsby',book:'위대한 개츠비',original:'The Great Gatsby',author:'F. 스콧 피츠제럴드',character:'제이 개츠비',aliases:['개츠비','gatsby','jay gatsby'],title:'초록 불빛이 머무는 밤',subtitle:'GATSBY’S DRAWING ROOM',style:'Art Deco',palette:['#343c34','#b39861','#e2d7bf'],image:'/images/gatsby.png',description:'짙은 올리브와 황동의 빛. 화려한 파티 뒤에 남겨진 고요함을 담은 아르데코 거실.',prompt:'Photorealistic architectural interior photograph, 1920s New York Art Deco living room inspired by Jay Gatsby, olive velvet sofa, walnut furniture, brass floor lamp, cream wool rug, evening light, no people, no text.',items:[{name:'올리브 벨벳 소파',material:'벨벳 패브릭 · 월넛 원목 프레임',size:'220 × 92 × 78 cm',x:49,y:60},{name:'월넛 커피 테이블',material:'월넛 무늬목 · 황동 다리',size:'110 × 60 × 38 cm',x:53,y:78},{name:'황동 플로어 램프',material:'브러시드 황동 · 린넨 갓',size:'45 × 45 × 160 cm',x:79,y:40}]},
+ {id:'anne',book:'빨간 머리 앤',original:'Anne of Green Gables',author:'루시 모드 몽고메리',character:'앤 셜리',aliases:['앤','anne','anne shirley'],title:'초록 지붕 아래, 나의 오후',subtitle:'ANNE’S SUNNY CORNER',style:'Cottage',palette:['#8a9b80','#ddc5ac','#f4eee0'],image:'/images/anne.png',description:'햇살이 흐르는 창가와 자연스러운 나무의 결. 상상력이 자라나는 따뜻한 코티지 공간.',prompt:'Photorealistic architectural interior photograph, warm Prince Edward Island cottage reading room inspired by Anne Shirley, sage green accents, oak table, linen chair, flowers, soft afternoon sunlight, no people, no text.',items:[{name:'린넨 라운지 체어',material:'천연 린넨 · 오크 원목',size:'80 × 85 × 82 cm',x:35,y:62},{name:'오크 사이드 테이블',material:'오크 원목 · 천연 오일 마감',size:'50 × 50 × 48 cm',x:62,y:74},{name:'내추럴 러그',material:'울 80% · 면 20%',size:'200 × 150 × 1.5 cm',x:49,y:86}]},
+ {id:'sherlock',book:'셜록 홈즈의 모험',original:'The Adventures of Sherlock Holmes',author:'아서 코난 도일',character:'셜록 홈즈',aliases:['홈즈','셜록','sherlock','sherlock holmes'],title:'베이커가 221B의 사색',subtitle:'SHERLOCK’S STUDY',style:'Classic',palette:['#443e32','#8b5c3c','#c5b896'],image:'/images/sherlock.png',description:'오래된 책장과 깊은 가죽의 질감. 작은 단서에도 시선이 머무는 차분한 서재.',prompt:'Photorealistic architectural interior photograph, Victorian London study inspired by Sherlock Holmes, dark oak bookshelves, cognac leather armchair, Persian rug, fireplace, atmospheric window light, no people, no text.',items:[{name:'가죽 윙백 체어',material:'코냑 천연 가죽 · 비치 원목',size:'85 × 90 × 110 cm',x:42,y:60},{name:'클래식 북케이스',material:'다크 오크 원목 · 황동 손잡이',size:'120 × 35 × 210 cm',x:77,y:38},{name:'페르시안 스타일 러그',material:'울 · 면 기초 직조',size:'240 × 170 × 1 cm',x:55,y:84}]}
+];
+export function matchCharacter(message){
+ const s=message.toLowerCase().normalize('NFKC');
+ return catalog.find(c=>{
+  const title=[c.book.toLowerCase(),c.original.toLowerCase()].find(t=>s.includes(t));
+  if(!title)return false;
+  const rest=s.replace(title,' ');
+  return [c.character,...c.aliases].some(a=>rest.includes(a.toLowerCase()));
+ });
+}
+export function publicConcept(c){const {prompt,aliases,...safe}=c;return safe;}
